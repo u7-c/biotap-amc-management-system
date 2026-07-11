@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import models
@@ -35,7 +36,13 @@ origins = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
 ]
+
+vercel_url = os.environ.get("VERCEL_URL")
+if vercel_url:
+    origins.append(f"https://{vercel_url}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,7 +52,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router.router)
+app.include_router(auth_router.router, prefix="/api")
 app.include_router(clients.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
 app.include_router(products.router, prefix="/api")

@@ -28,14 +28,14 @@ app.add_middleware(
 )
 
 app.include_router(auth_router.router)
-app.include_router(clients.router)
-app.include_router(analytics.router)
-app.include_router(products.router)
-app.include_router(client_products.router)
-app.include_router(amcs.router)
-app.include_router(leads.router)
-app.include_router(users.router)
-app.include_router(upload.router)
+app.include_router(clients.router, prefix="/api")
+app.include_router(analytics.router, prefix="/api")
+app.include_router(products.router, prefix="/api")
+app.include_router(client_products.router, prefix="/api")
+app.include_router(amcs.router, prefix="/api")
+app.include_router(leads.router, prefix="/api")
+app.include_router(users.router, prefix="/api")
+app.include_router(upload.router, prefix="/api")
 
 @app.get("/")
 def read_root():

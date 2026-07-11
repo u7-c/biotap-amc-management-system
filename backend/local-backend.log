@@ -3,3 +3,5 @@ INFO:     127.0.0.1:58793 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58798 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58147 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58147 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61105 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56950 - "GET /api/analytics/dashboard HTTP/1.1" 200 OK

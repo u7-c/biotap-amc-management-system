@@ -1,15 +1,19 @@
 import os
+import sys
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+BACKEND_DIR = Path(__file__).resolve().parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
 import models
 from database import engine
 from routers import clients, analytics, products, amcs, leads, upload, auth_router, users, client_products
 import auth
 from add_admin import add_admin
 from seed import seed_db_if_empty
-
-models.Base.metadata.create_all(bind=engine)
-add_admin()
 
 
 def seed_demo_data_if_needed():
@@ -18,9 +22,14 @@ def seed_demo_data_if_needed():
         seed_db_if_empty()
 
 
-seed_demo_data_if_needed()
-
 app = FastAPI(title="AMC Management System API")
+
+
+@app.on_event("startup")
+def on_startup():
+    models.Base.metadata.create_all(bind=engine)
+    add_admin()
+    seed_demo_data_if_needed()
 
 # Configure CORS
 origins = [

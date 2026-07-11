@@ -1,13 +1,16 @@
 import os
+from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+
+BASE_DIR = Path(__file__).resolve().parent
 
 # Use Vercel's /tmp directory for SQLite if running on Vercel without a Postgres DB
 if os.environ.get("VERCEL"):
     default_db = "sqlite:////tmp/amc.db"
 else:
-    default_db = "sqlite:///./amc.db"
+    default_db = f"sqlite:///{(BASE_DIR / 'amc.db').as_posix()}"
 
 # Use POSTGRES_URL (Vercel Postgres default) or DATABASE_URL if provided
 db_url = os.environ.get("POSTGRES_URL") or os.environ.get("DATABASE_URL") or default_db

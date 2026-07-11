@@ -1,13 +1,31 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import models
-from database import engine
+from database import engine, SessionLocal
 from routers import clients, analytics, products, amcs, leads, upload, auth_router, users, client_products
 import auth
 from add_admin import add_admin
+from seed import seed_db
 
 models.Base.metadata.create_all(bind=engine)
 add_admin()
+
+
+def seed_demo_data_if_needed():
+    db = SessionLocal()
+    try:
+        has_clients = db.query(models.Client.id).first() is not None
+        has_products = db.query(models.Product.id).first() is not None
+        has_amcs = db.query(models.AMC.id).first() is not None
+        has_leads = db.query(models.Lead.id).first() is not None
+
+        if not (has_clients and has_products and has_amcs and has_leads):
+            seed_db()
+    finally:
+        db.close()
+
+
+seed_demo_data_if_needed()
 
 app = FastAPI(title="AMC Management System API")
 

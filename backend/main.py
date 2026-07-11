@@ -1,32 +1,21 @@
 import os
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import models
-from database import engine, SessionLocal
+from database import engine
 from routers import clients, analytics, products, amcs, leads, upload, auth_router, users, client_products
 import auth
 from add_admin import add_admin
-from seed import seed_db
+from seed import seed_db_if_empty
 
 models.Base.metadata.create_all(bind=engine)
 add_admin()
 
 
 def seed_demo_data_if_needed():
-    if engine.dialect.name != "sqlite":
-        return
-
-    db = SessionLocal()
-    try:
-        has_clients = db.query(models.Client.id).first() is not None
-        has_products = db.query(models.Product.id).first() is not None
-        has_amcs = db.query(models.AMC.id).first() is not None
-        has_leads = db.query(models.Lead.id).first() is not None
-
-        if not (has_clients and has_products and has_amcs and has_leads):
-            seed_db()
-    finally:
-        db.close()
+    auto_seed = os.environ.get("AUTO_SEED_DEMO_DATA", "false").lower() in {"1", "true", "yes", "on"}
+    if auto_seed:
+        seed_db_if_empty()
 
 
 seed_demo_data_if_needed()

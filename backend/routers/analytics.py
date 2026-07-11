@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import date, timedelta
 import models
-from database import engine, get_db
+from database import get_db
 
 router = APIRouter(
     prefix="/analytics",
@@ -47,10 +47,7 @@ def get_dashboard_metrics(db: Session = Depends(get_db)):
     ).count()
     conversion_rate = round((leads.get("Converted", 0) / total_leads) * 100, 1) if total_leads else 0
 
-    if engine.dialect.name == "postgresql":
-        month_expr = func.to_char(models.AMC.start_date, "YYYY-MM")
-    else:
-        month_expr = func.strftime("%Y-%m", models.AMC.start_date)
+    month_expr = func.to_char(models.AMC.start_date, "YYYY-MM")
 
     monthly_rows = db.query(
         month_expr.label("month"),

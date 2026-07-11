@@ -1,6 +1,6 @@
 import random
+import os
 from datetime import date, timedelta
-from sqlalchemy.orm import Session
 from database import engine, get_db, Base
 import models
 import auth
@@ -121,5 +121,22 @@ def seed_db():
     db.commit()
     print("Database seeded successfully.")
 
+
+def seed_db_if_empty(force: bool = False):
+    Base.metadata.create_all(bind=engine)
+
+    db = next(get_db())
+    try:
+        has_data = any(
+            db.query(model.id).first() is not None
+            for model in (models.User, models.Client, models.Product, models.ClientProduct, models.AMC, models.Lead)
+        )
+
+        if force or not has_data:
+            seed_db()
+    finally:
+        db.close()
+
 if __name__ == "__main__":
-    seed_db()
+    force_seed = os.environ.get("FORCE_SEED", "false").lower() in {"1", "true", "yes", "on"}
+    seed_db_if_empty(force=force_seed)

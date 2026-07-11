@@ -9,7 +9,6 @@ import Clients from './pages/Clients'
 import Products from './pages/Products'
 import AMCs from './pages/AMCs'
 import Leads from './pages/Leads'
-import Login from './pages/Login'
 import Ownership from './pages/Ownership'
 import Reports from './pages/Reports'
 import UserManagement from './pages/UserManagement'
@@ -52,9 +51,6 @@ function Layout({ children, theme, toggleTheme, onLogout }) {
             <UserCog size={18} style={{ marginRight: '10px' }} /> Users
           </Link>
         </nav>
-        <button onClick={onLogout} className="btn" style={{ justifyContent: 'flex-start', color: 'var(--danger)', marginTop: 'auto' }}>
-          <LogOut size={18} style={{ marginRight: '10px' }} /> Logout
-        </button>
       </aside>
 
       <main className="main-content">
@@ -71,38 +67,16 @@ function Layout({ children, theme, toggleTheme, onLogout }) {
 
 function App() {
   const [theme, setTheme] = useState('light')
-  const [token, setToken] = useState(localStorage.getItem('amc_token'))
   
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('amc_token', token)
-      api.get('/auth/me').catch(() => setToken(null))
-    } else {
-      localStorage.removeItem('amc_token')
-    }
-  }, [token])
-
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light')
-  
-  const handleLogin = (newToken) => {
-    setToken(newToken)
-  }
-
-  const handleLogout = () => {
-    setToken(null)
-  }
-
-  if (!token) {
-    return <Login onLogin={handleLogin} />
-  }
 
   return (
     <BrowserRouter>
-      <Layout theme={theme} toggleTheme={toggleTheme} onLogout={handleLogout}>
+      <Layout theme={theme} toggleTheme={toggleTheme}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/clients" element={<Clients />} />

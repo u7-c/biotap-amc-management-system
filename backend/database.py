@@ -3,17 +3,28 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# Use Vercel's /tmp directory for SQLite if running on Vercel without a Postgres DB
-if os.environ.get("VERCEL"):
-    default_db = "sqlite:////tmp/amc.db"
-else:
-    default_db = f"sqlite:///{(BASE_DIR / 'amc.db').as_posix()}"
+def get_database_url():
+    postgres_url = (
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("POSTGRES_URL_NON_POOLING")
+        or os.environ.get("POSTGRES_URL")
+        or os.environ.get("POSTGRES_PRISMA_URL")
+    )
 
-# Use POSTGRES_URL (Vercel Postgres default) or DATABASE_URL if provided
-db_url = os.environ.get("POSTGRES_URL") or os.environ.get("DATABASE_URL") or default_db
+    if postgres_url:
+        return postgres_url
+
+    if os.environ.get("VERCEL"):
+        return "sqlite:////tmp/amc.db"
+
+    return f"sqlite:///{(BASE_DIR / 'amc.db').as_posix()}"
+
+
+db_url = get_database_url()
 
 # SQLAlchemy 1.4+ requires 'postgresql://' instead of 'postgres://'
 if db_url.startswith("postgres://"):
@@ -22,11 +33,15 @@ if db_url.startswith("postgres://"):
 SQLALCHEMY_DATABASE_URL = db_url
 
 # Only use check_same_thread for SQLite
-connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args=connect_args
-)
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+else:
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        poolclass=NullPool,
+        pool_pre_ping=True,
+    )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

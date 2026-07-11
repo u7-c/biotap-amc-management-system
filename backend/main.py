@@ -13,6 +13,9 @@ add_admin()
 
 
 def seed_demo_data_if_needed():
+    if engine.dialect.name != "sqlite":
+        return
+
     db = SessionLocal()
     try:
         has_clients = db.query(models.Client.id).first() is not None
